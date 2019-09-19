@@ -3,6 +3,15 @@ name = "creep"
 version = "0.1.0"
 authors = ["Cryptape Technologies <contact@cryptape.com>"]
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/zeroqn/creep"
+description = "context"
+
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+    "LICENSE",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
