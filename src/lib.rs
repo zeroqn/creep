@@ -47,6 +47,7 @@ impl Context {
         }
     }
 
+    #[must_use]
     pub fn with_value<V>(&self, key: &str, val: V) -> Self
     where
         V: Cloneable + 'static,
