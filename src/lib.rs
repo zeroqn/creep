@@ -1,39 +1,18 @@
-use std::{
-    any::Any,
-    collections::HashMap,
-    fmt::Debug,
-    marker::{Send, Sync},
-};
+use dyn_clone::DynClone;
 
-pub trait Cloneable: CloneableImpl + Debug + Send + Sync {}
+use std::{any::Any, collections::HashMap, fmt::Debug};
 
-pub trait CloneableImpl {
-    fn box_clone(&self) -> Box<dyn Cloneable>;
+pub trait Cloneable: DynClone + Debug {
     fn as_any(&self) -> &dyn Any;
 }
 
-impl<T> CloneableImpl for T
-where
-    T: Cloneable + Clone + Debug + 'static,
-{
-    fn box_clone(&self) -> Box<dyn Cloneable> {
-        Box::new(self.clone())
-    }
+dyn_clone::clone_trait_object!(Cloneable);
 
+impl<T: DynClone + Debug + 'static> Cloneable for T {
     fn as_any(&self) -> &dyn Any {
         self
     }
 }
-
-impl Clone for Box<dyn Cloneable> {
-    fn clone(&self) -> Box<dyn Cloneable> {
-        self.box_clone()
-    }
-}
-
-impl Cloneable for String {}
-impl Cloneable for usize {}
-impl Cloneable for u64 {}
 
 #[derive(Debug, Clone, Default)]
 pub struct Context {
@@ -54,7 +33,7 @@ impl Context {
     {
         let mut ctx = self.clone();
 
-        ctx.map.insert(key.to_owned(), val.box_clone());
+        ctx.map.insert(key.to_owned(), Box::new(val));
         ctx
     }
 
@@ -62,9 +41,9 @@ impl Context {
     where
         V: Cloneable + 'static,
     {
-        self.map
-            .get(key)
-            .and_then(|any| any.as_any().downcast_ref::<V>())
+        let opt_val = self.map.get(key);
+
+        opt_val.and_then(|v| v.as_ref().as_any().downcast_ref::<V>())
     }
 }
 
@@ -101,8 +80,6 @@ mod tests {
     fn should_able_to_insert_new_type() {
         #[derive(Debug, Clone, PartialEq)]
         struct World;
-
-        impl super::Cloneable for World {}
 
         let ctx = Context::new().with_value::<World>("hello", World);
         assert_eq!(ctx.get::<World>("hello"), Some(&World));

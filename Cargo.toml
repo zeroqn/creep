@@ -1,6 +1,6 @@
 [package]
 name = "creep"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Cryptape Technologies <contact@cryptape.com>"]
 edition = "2018"
 license = "MIT"
@@ -16,3 +16,4 @@ include = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dyn-clone = "1.0"
