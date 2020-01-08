@@ -2,13 +2,13 @@ use dyn_clone::DynClone;
 
 use std::{any::Any, collections::HashMap, fmt::Debug};
 
-pub trait Cloneable: DynClone + Send + Debug {
+pub trait Cloneable: DynClone + Send + Sync + Debug {
     fn as_any(&self) -> &dyn Any;
 }
 
 dyn_clone::clone_trait_object!(Cloneable);
 
-impl<T: DynClone + Send + Debug + 'static> Cloneable for T {
+impl<T: DynClone + Send + Sync + Debug + 'static> Cloneable for T {
     fn as_any(&self) -> &dyn Any {
         self
     }
