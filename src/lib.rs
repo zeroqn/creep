@@ -26,15 +26,11 @@ impl Context {
         }
     }
 
-    #[must_use]
-    pub fn with_value<V>(&self, key: &str, val: V) -> Self
+    pub fn with_value<V>(&mut self, key: &str, val: V)
     where
         V: Cloneable + 'static,
     {
-        let mut ctx = self.clone();
-
-        ctx.map.insert(key.to_owned(), Box::new(val));
-        ctx
+        self.map.insert(key.to_owned(), Box::new(val));
     }
 
     pub fn get<V>(&self, key: &str) -> Option<&V>
@@ -53,26 +49,18 @@ mod tests {
 
     #[test]
     fn should_insert_and_get_back_value_reference() {
-        let ctx = Context::new().with_value::<String>("name", "creep".to_owned());
+        let mut ctx = Context::new();
+        ctx.with_value::<String>("name", "creep".to_owned());
         assert_eq!(ctx.get::<String>("name"), Some(&"creep".to_owned()));
 
-        let ctx = ctx.with_value::<usize>("size", 2020);
+        ctx.with_value::<usize>("size", 2020);
         assert_eq!(ctx.get::<usize>("size"), Some(&2020));
     }
 
     #[test]
-    fn should_clone_context_on_every_insert() {
-        let ctx = Context::new().with_value::<usize>("bow", 1);
-        assert_eq!(ctx.get::<usize>("bow"), Some(&1));
-
-        let new_ctx = ctx.with_value::<usize>("player", 2);
-        assert_eq!(new_ctx.get::<usize>("player"), Some(&2));
-        assert_eq!(ctx.get::<usize>("player"), None);
-    }
-
-    #[test]
     fn should_get_none_on_wrong_type() {
-        let ctx = Context::new().with_value::<usize>("ff7", 1);
+        let mut ctx = Context::new();
+        ctx.with_value::<usize>("ff7", 1);
         assert_eq!(ctx.get::<u64>("ff7"), None);
     }
 
@@ -81,7 +69,8 @@ mod tests {
         #[derive(Debug, Clone, PartialEq)]
         struct World;
 
-        let ctx = Context::new().with_value::<World>("hello", World);
+        let mut ctx = Context::new();
+        ctx.with_value::<World>("hello", World);
         assert_eq!(ctx.get::<World>("hello"), Some(&World));
     }
 }
